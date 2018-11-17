@@ -102,6 +102,24 @@ TEST(BinaryHeapAdvanced, EmptyIteratorConstructor) {
   EXPECT_EQ(heap.empty(), true);
 }
 
+TEST(BinaryHeapAdvanced, Optimize) {
+  BinaryHeap<int> heap = BinaryHeap<int>();
+
+  heap.optimize(1, 1);
+  EXPECT_EQ(heap.get_tree_degree(), 4);
+
+  heap.insert(2);
+  heap.insert(3);
+  heap.insert(3);
+  heap.insert(63);
+  heap.insert(-1);
+  heap.insert(0);
+  heap.insert(7);
+  EXPECT_EQ(heap.extract_min(), -1);
+  heap.insert(1);
+  EXPECT_EQ(heap.extract_min(), 0);
+}
+
 TEST(BinaryHeapExceptions, RequestsToEmptyHeap) {
   BinaryHeap<int> heap = BinaryHeap<int>();
 
@@ -148,4 +166,14 @@ TEST(BinaryHeapExceptions, Stress) {
       EXPECT_EQ(heap.size(), size);
     }
   }
+}
+
+TEST(BinaryHeapExceptions, OptimizeExceptions) {
+  BinaryHeap<int> heap = BinaryHeap<int>();
+  heap.insert(1);
+
+  EXPECT_THROW(heap.optimize(1, 1), std::runtime_error);
+
+  heap.extract_min();
+  EXPECT_THROW(heap.optimize(10, 100), std::invalid_argument);
 }

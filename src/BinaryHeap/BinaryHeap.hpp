@@ -10,6 +10,7 @@
 #include <memory>
 #include <exception>
 #include <bits/shared_ptr.h>
+#include <cmath>
 #include "Vector.hpp"
 
 template <typename T>
@@ -36,6 +37,8 @@ class BinaryHeap {
 
   size_t size();
 
+  size_t get_tree_degree();
+
   std::shared_ptr<Pointer> insert(T value);
 
   T min();
@@ -52,7 +55,29 @@ class BinaryHeap {
   BinaryHeap(Iterator begin, Iterator end);
 
   void optimize(size_t insert_count, size_t extract_count) {
-    
+    if (size() != 0) {
+      throw std::runtime_error ("Can Not optimize non empty heap");
+    }
+    if (extract_count > insert_count) {
+      throw std::invalid_argument ("Extract count can not be grater than insert count");
+    }
+    if (extract_count == 0) {
+      throw std::invalid_argument ("Extract count can not be 0");
+    }
+
+    double alpha = 1.0d * insert_count / extract_count;
+    double prev_time_consumption = -1;
+    double time_consumption = -1;
+    unsigned long k = 1;
+
+    while (prev_time_consumption == -1 || time_consumption <= prev_time_consumption) {
+      ++k;
+      prev_time_consumption = time_consumption;
+      time_consumption = (1.0d * k + alpha) / std::log(k);
+    }
+
+
+    tree_degree = k - 1;
   }
 
  private:
@@ -61,7 +86,7 @@ class BinaryHeap {
     std::shared_ptr<typename BinaryHeap<T>::Pointer> pointer;
   };
 
-  unsigned long tree_degree = 2;
+  size_t tree_degree = 2;
   Vector<Element> storage;
 
   void swap_elements(unsigned long first_index, unsigned long second_index);
@@ -101,6 +126,11 @@ size_t BinaryHeap<T>::size() {
 template<typename T>
 bool BinaryHeap<T>::empty() {
   return storage.empty();
+}
+
+template<typename T>
+size_t BinaryHeap<T>::get_tree_degree() {
+  return tree_degree;
 }
 
 template<typename T>
