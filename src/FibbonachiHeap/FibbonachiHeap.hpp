@@ -38,11 +38,18 @@ class FibbonachiHeap {
   }
 
   T min() {
+    if (empty()) {
+      throw std::runtime_error ("Heap is empty");
+    }
+
     return min_root->value;
   }
 
   T extract_min() {
-    assert(!empty());
+    if (empty()) {
+      throw std::runtime_error ("Heap is empty");
+    }
+
     auto extracted_node = min_root;
     extract_node(min_root);
     --size_;
@@ -60,7 +67,9 @@ class FibbonachiHeap {
   }
 
   void remove(std::shared_ptr<Pointer> pointer) {
-    assert(pointer->is_valid());
+    if (!pointer->is_valid()) {
+      throw std::runtime_error ("Invalidated pointer to an element");
+    }
     auto node = pointer->node;
     auto parent = node->parent;
 
@@ -73,14 +82,18 @@ class FibbonachiHeap {
     delete node;
   }
 
-  void change(std::shared_ptr<Pointer> pointer, T new_value) {
-    assert(new_value <= pointer->value());
+  void decrease_key(std::shared_ptr<Pointer> pointer, T new_value) {
+    if (!pointer->is_valid()) {
+      throw std::runtime_error ("Invalidated pointer to an element");
+    }
+    if (new_value > pointer->value()) {
+      throw std::invalid_argument ("Value can only be decreased");
+    }
 
     auto node = pointer->node;
     auto parent = node->parent;
 
     cut_out_node(node);
-
     node->value = new_value;
     concat_node_lists(min_root, node);
 
@@ -108,7 +121,9 @@ class FibbonachiHeap {
   TreeNode* min_root;
 
   void static concat_node_lists(TreeNode* &first_list, TreeNode* second_list) {
-    assert(second_list != nullptr);
+    if (second_list == nullptr) {
+      throw std::invalid_argument ("Can not append empty list");
+    }
 
     if (first_list == nullptr) {
       first_list = second_list;
@@ -156,7 +171,9 @@ class FibbonachiHeap {
   }
 
   void consolidate() {
-    assert(min_root != nullptr);
+    if (min_root == nullptr) {
+      throw std::runtime_error ("Can not consolidate empty heap");
+    }
 
     unsigned long highest_bit = D();
     TreeNode* roots[highest_bit];
@@ -168,13 +185,13 @@ class FibbonachiHeap {
       auto cur_root = min_root;
       cut_out_node(min_root);
 
-      while (roots[cur_root->get_degree()] != nullptr) {
-        auto second_root = roots[cur_root->get_degree()];
-        roots[cur_root->get_degree()] = nullptr;
+      while (roots[cur_root->degree] != nullptr) {
+        auto second_root = roots[cur_root->degree];
+        roots[cur_root->degree] = nullptr;
 
         cur_root = cur_root->hang(second_root);
       }
-      roots[cur_root->get_degree()] = cur_root;
+      roots[cur_root->degree] = cur_root;
     }
 
     for (unsigned long j = 0; j < highest_bit; ++j) {
@@ -234,8 +251,11 @@ class FibbonachiHeap {
   }
 
   void cascading_cut(TreeNode* node) {
-    if (node == nullptr || node->parent == nullptr) {
+    if (node == nullptr) {
       return;
+    }
+    if (node->parent == nullptr) {
+      node->degree -= 1;
     }
 
     if (node->mark) {
@@ -248,6 +268,7 @@ class FibbonachiHeap {
       cascading_cut(parent);
     } else {
       node->mark = true;
+      node->degree -= 1;
     }
   }
 
@@ -259,6 +280,7 @@ class FibbonachiHeap {
     TreeNode* right_sib;
     TreeNode* parent;
     TreeNode* child;
+    unsigned long degree;
 
     explicit TreeNode(T value) {
       this->value = value;
@@ -272,7 +294,9 @@ class FibbonachiHeap {
     }
 
     TreeNode* hang(TreeNode* second_tree) {
-      assert(degree == second_tree->degree);
+      if (degree != second_tree->degree) {
+        throw std::runtime_error ("Trees should have the same degree to hang one to another");
+      }
 
       TreeNode* root_tree = this;
       if (second_tree->value < root_tree->value) {
@@ -289,13 +313,8 @@ class FibbonachiHeap {
       return pointer;
     }
 
-    unsigned long get_degree() {
-      return degree;
-    }
-
    private:
     friend class FibbonachiHeap;
-    unsigned long degree;
     std::shared_ptr<Pointer> pointer;
   };
 
@@ -312,7 +331,9 @@ class FibbonachiHeap {
     }
 
     T value() {
-      assert(is_valid());
+      if (!is_valid()) {
+        throw std::runtime_error ("Invalidated pointer to an element");
+      }
       return node->value;
     }
    private:
