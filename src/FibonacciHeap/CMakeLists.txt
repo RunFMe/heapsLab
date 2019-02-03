@@ -1,15 +1,15 @@
-add_library(fibbonachiHeap)
+add_library(fibonacciHeap)
 
 target_sources(
-        fibbonachiHeap
+        fibonacciHeap
         PUBLIC
-        ${CMAKE_CURRENT_LIST_DIR}/FibbonachiHeap.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/FibonacciHeap.hpp
 )
 
 target_include_directories(
-        fibbonachiHeap
+        fibonacciHeap
         PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}
 )
 
-set_target_properties(fibbonachiHeap PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(fibonacciHeap PROPERTIES LINKER_LANGUAGE CXX)

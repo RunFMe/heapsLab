@@ -3,32 +3,32 @@
 //
 
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE testFibbonachiHeap
+#define BOOST_TEST_MODULE testFibonacciHeap
 
-#include "../src/FibbonachiHeap/FibbonachiHeap.hpp"
+#include "../src/FibonacciHeap/FibonacciHeap.hpp"
 #include <gtest/gtest.h>
 
-TEST(FibbonachiHeapBasics, Constructor) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapBasics, Constructor) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
   EXPECT_EQ(heap.empty(), true);
 }
 
-TEST(FibbonachiHeapBasics, Empty) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapBasics, Empty) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
   EXPECT_EQ(heap.empty(), true);
 
   heap.insert(1);
   EXPECT_EQ(heap.empty(), false);
 }
 
-TEST(FibbonachiHeapBasics, Insert) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapBasics, Insert) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
   auto pointer = heap.insert(1);
   EXPECT_EQ(pointer->value(), 1);
 }
 
-TEST(FibbonachiHeapBasics, GetMin) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapBasics, GetMin) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
   auto pointer = heap.insert(1);
   heap.insert(2);
   heap.insert(5);
@@ -37,8 +37,8 @@ TEST(FibbonachiHeapBasics, GetMin) {
   EXPECT_EQ(heap.min(), 0);
 }
 
-TEST(FibbonachiHeapBasics, ExtractMin) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapBasics, ExtractMin) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
   heap.insert(2);
   heap.insert(3);
   heap.insert(5);
@@ -57,8 +57,8 @@ TEST(FibbonachiHeapBasics, ExtractMin) {
   EXPECT_EQ(heap.size(), 0);
 }
 
-TEST(FibbonachiHeapBasics, Size) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapBasics, Size) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
   EXPECT_EQ(heap.size(), 0);
   heap.insert(1);
   EXPECT_EQ(heap.size(), 1);
@@ -71,8 +71,8 @@ TEST(FibbonachiHeapBasics, Size) {
   EXPECT_EQ(heap.size(), 2);
 }
 
-TEST(FibbonachiHeapBasics, Delete) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapBasics, Delete) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
   auto pointer_to_1 = heap.insert(1);
   heap.remove(pointer_to_1);
   EXPECT_EQ(pointer_to_1->is_valid(), false);
@@ -86,8 +86,8 @@ TEST(FibbonachiHeapBasics, Delete) {
   EXPECT_EQ(heap.min(), 1);
 }
 
-TEST(FibbonachiHeapAdvanced, Change) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapAdvanced, Change) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
   heap.insert(1);
   heap.insert(3);
   auto pointer_to_2 = heap.insert(2);
@@ -102,9 +102,9 @@ TEST(FibbonachiHeapAdvanced, Change) {
   EXPECT_EQ(heap.min(), -1);
 }
 
-TEST(FibbonachiHeapAdvanced, MergeEmptyToNonEmpty) {
-  FibbonachiHeap<int> heap1 = FibbonachiHeap<int>();
-  FibbonachiHeap<int> heap2 = FibbonachiHeap<int>();
+TEST(FibonacciHeapAdvanced, MergeEmptyToNonEmpty) {
+  FibonacciHeap<int> heap1 = FibonacciHeap<int>();
+  FibonacciHeap<int> heap2 = FibonacciHeap<int>();
   heap1.insert(1);
   heap1.insert(3);
 
@@ -114,9 +114,9 @@ TEST(FibbonachiHeapAdvanced, MergeEmptyToNonEmpty) {
   EXPECT_EQ(heap2.size(), 0);
 }
 
-TEST(FibbonachiHeapAdvanced, MergeNonEmptyToEmpty) {
-  FibbonachiHeap<int> heap1 = FibbonachiHeap<int>();
-  FibbonachiHeap<int> heap2 = FibbonachiHeap<int>();
+TEST(FibonacciHeapAdvanced, MergeNonEmptyToEmpty) {
+  FibonacciHeap<int> heap1 = FibonacciHeap<int>();
+  FibonacciHeap<int> heap2 = FibonacciHeap<int>();
   heap1.insert(1);
   heap1.insert(3);
 
@@ -126,9 +126,9 @@ TEST(FibbonachiHeapAdvanced, MergeNonEmptyToEmpty) {
   EXPECT_EQ(heap1.size(), 0);
 }
 
-TEST(FibbonachiHeapAdvanced, MergeNonEmptyToNonEmpty) {
-  FibbonachiHeap<int> heap1 = FibbonachiHeap<int>();
-  FibbonachiHeap<int> heap2 = FibbonachiHeap<int>();
+TEST(FibonacciHeapAdvanced, MergeNonEmptyToNonEmpty) {
+  FibonacciHeap<int> heap1 = FibonacciHeap<int>();
+  FibonacciHeap<int> heap2 = FibonacciHeap<int>();
   heap1.insert(1);
   heap1.insert(3);
 
@@ -141,15 +141,15 @@ TEST(FibbonachiHeapAdvanced, MergeNonEmptyToNonEmpty) {
   EXPECT_EQ(heap2.size(), 0);
 }
 
-TEST(FibbonachiHeapExceptions, RequestsToEmptyHeap) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapExceptions, RequestsToEmptyHeap) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
 
   EXPECT_THROW(heap.min(), std::runtime_error);
   EXPECT_THROW(heap.extract_min(), std::runtime_error);
 }
 
-TEST(FibbonachiHeapExceptions, RequestsToInvalidatedPointer) {
-  FibbonachiHeap<int> heap = FibbonachiHeap<int>();
+TEST(FibonacciHeapExceptions, RequestsToInvalidatedPointer) {
+  FibonacciHeap<int> heap = FibonacciHeap<int>();
   auto pointer_to_1 = heap.insert(1);
   heap.remove(pointer_to_1);
 

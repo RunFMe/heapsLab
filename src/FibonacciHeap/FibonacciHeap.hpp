@@ -5,14 +5,15 @@
 #include <stdexcept>
 #include <memory>
 #include <cassert>
-template <class T>
-class FibbonachiHeap {
+
+template<class T>
+class FibonacciHeap {
  private:
   class TreeNode;
   class Pointer;
 
  public:
-  FibbonachiHeap() {
+  FibonacciHeap() {
     size_ = 0;
     min_root = nullptr;
   }
@@ -26,8 +27,8 @@ class FibbonachiHeap {
   }
 
   std::shared_ptr<Pointer> insert(T value) {
-    auto new_root = new TreeNode(value);
-    concat_node_lists(min_root, new_root);
+    auto new_root = TreeNode::create_node(value);
+    concatenate_node_lists(min_root, new_root);
     ++size_;
 
     if (new_root->value < min_root->value) {
@@ -39,7 +40,7 @@ class FibbonachiHeap {
 
   T min() {
     if (empty()) {
-      throw std::runtime_error ("Heap is empty");
+      throw std::runtime_error("Heap is empty");
     }
 
     return min_root->value;
@@ -47,28 +48,27 @@ class FibbonachiHeap {
 
   T extract_min() {
     if (empty()) {
-      throw std::runtime_error ("Heap is empty");
+      throw std::runtime_error("Heap is empty");
     }
 
     auto extracted_node = min_root;
     extract_node(min_root);
     --size_;
 
-    if (min_root != nullptr){
+    if (min_root != nullptr) {
       consolidate();
     }
     find_new_min();
 
     T return_value = extracted_node->value;
     extracted_node->get_pointer()->valid = false;
-    delete extracted_node;
 
     return return_value;
   }
 
   void remove(std::shared_ptr<Pointer> pointer) {
     if (!pointer->is_valid()) {
-      throw std::runtime_error ("Invalidated pointer to an element");
+      throw std::runtime_error("Invalidated pointer to an element");
     }
     auto node = pointer->node;
     auto parent = node->parent;
@@ -79,15 +79,14 @@ class FibbonachiHeap {
     find_new_min();
 
     pointer->valid = false;
-    delete node;
   }
 
   void decrease_key(std::shared_ptr<Pointer> pointer, T new_value) {
     if (!pointer->is_valid()) {
-      throw std::runtime_error ("Invalidated pointer to an element");
+      throw std::runtime_error("Invalidated pointer to an element");
     }
     if (new_value > pointer->value()) {
-      throw std::invalid_argument ("Value can only be decreased");
+      throw std::invalid_argument("Value can only be decreased");
     }
 
     auto node = pointer->node;
@@ -95,15 +94,15 @@ class FibbonachiHeap {
 
     cut_out_node(node);
     node->value = new_value;
-    concat_node_lists(min_root, node);
+    concatenate_node_lists(min_root, node);
 
     cascading_cut(parent);
     find_new_min();
   }
 
-  void merge(FibbonachiHeap &heap) {
+  void merge(FibonacciHeap &heap) {
     if (heap.min_root != nullptr) {
-      concat_node_lists(min_root, heap.min_root);
+      concatenate_node_lists(min_root, heap.min_root);
       size_ += heap.size_;
       find_new_min();
 
@@ -112,17 +111,17 @@ class FibbonachiHeap {
     }
   }
 
-  ~FibbonachiHeap() {
+  ~FibonacciHeap() {
     recursive_delete(min_root);
   }
 
  private:
   unsigned long size_;
-  TreeNode* min_root;
+  std::shared_ptr<TreeNode> min_root;
 
-  void static concat_node_lists(TreeNode* &first_list, TreeNode* second_list) {
+  void static concatenate_node_lists(std::shared_ptr<TreeNode> &first_list, std::shared_ptr<TreeNode> second_list) {
     if (second_list == nullptr) {
-      throw std::invalid_argument ("Can not append empty list");
+      throw std::invalid_argument("Can not append empty list");
     }
 
     if (first_list == nullptr) {
@@ -135,7 +134,7 @@ class FibbonachiHeap {
     }
   }
 
-  void cut_out_node(TreeNode* node) {
+  void cut_out_node(std::shared_ptr<TreeNode> node) {
     auto parent = node->parent;
     if (node->parent != nullptr) {
       node->parent = nullptr;
@@ -143,15 +142,15 @@ class FibbonachiHeap {
 
     if (node->left_sib == node) {
       if (parent == nullptr) {
-         min_root = nullptr;
+        min_root = nullptr;
       } else {
         parent->child = nullptr;
       }
     } else {
-      if (parent != nullptr){
+      if (parent != nullptr) {
         parent->child = node->right_sib;
-      } else if (node == min_root){
-        min_root= node->right_sib;
+      } else if (node == min_root) {
+        min_root = node->right_sib;
       }
 
       node->left_sib->right_sib = node->right_sib;
@@ -161,7 +160,7 @@ class FibbonachiHeap {
     }
   }
 
-  unsigned long D() {
+  unsigned long max_tree_degree() {
     unsigned long highest_bit = 0;
     while ((size_ >> highest_bit) > 0) {
       ++highest_bit;
@@ -172,11 +171,11 @@ class FibbonachiHeap {
 
   void consolidate() {
     if (min_root == nullptr) {
-      throw std::runtime_error ("Can not consolidate empty heap");
+      throw std::runtime_error("Can not consolidate empty heap");
     }
 
-    unsigned long highest_bit = D();
-    TreeNode* roots[highest_bit];
+    unsigned long highest_bit = max_tree_degree();
+    std::shared_ptr<TreeNode> roots[highest_bit];
     for (unsigned long i = 0; i < highest_bit; ++i) {
       roots[i] = nullptr;
     }
@@ -196,7 +195,7 @@ class FibbonachiHeap {
 
     for (unsigned long j = 0; j < highest_bit; ++j) {
       if (roots[j] != nullptr) {
-        concat_node_lists(min_root, roots[j]);
+        concatenate_node_lists(min_root, roots[j]);
         if (roots[j]->value < min_root->value) {
           min_root = roots[j];
         }
@@ -204,7 +203,7 @@ class FibbonachiHeap {
     }
   }
 
-  void add_children_as_roots(TreeNode* node) {
+  void add_children_as_roots(std::shared_ptr<TreeNode> node) {
     if (node->child != nullptr) {
       auto cur_child = node->child;
       do {
@@ -213,7 +212,7 @@ class FibbonachiHeap {
         cur_child = cur_child->right_sib;
       } while (cur_child != node->child);
 
-      concat_node_lists(min_root, node->child);
+      concatenate_node_lists(min_root, node->child);
       node->child = nullptr;
     }
   }
@@ -234,23 +233,21 @@ class FibbonachiHeap {
     }
   }
 
-  void extract_node(TreeNode* node) {
+  void extract_node(std::shared_ptr<TreeNode> node) {
     cut_out_node(node);
     add_children_as_roots(node);
   }
 
-  void recursive_delete(TreeNode* node) {
+  void recursive_delete(std::shared_ptr<TreeNode> node) {
     if (node == nullptr) {
       return;
     }
     recursive_delete(node->child);
     node->left_sib->right_sib = nullptr;
     recursive_delete(node->right_sib);
-
-    delete node;
   }
 
-  void cascading_cut(TreeNode* node) {
+  void cascading_cut(std::shared_ptr<TreeNode> node) {
     if (node == nullptr) {
       return;
     }
@@ -263,7 +260,7 @@ class FibbonachiHeap {
 
       cut_out_node(node);
       node->mark = false;
-      concat_node_lists(min_root, node);
+      concatenate_node_lists(min_root, node);
 
       cascading_cut(parent);
     } else {
@@ -274,36 +271,34 @@ class FibbonachiHeap {
 
   class TreeNode {
    public:
+    friend class FibonacciHeap;
     T value;
     bool mark;
-    TreeNode* left_sib;
-    TreeNode* right_sib;
-    TreeNode* parent;
-    TreeNode* child;
+    std::shared_ptr<TreeNode> left_sib;
+    std::shared_ptr<TreeNode> right_sib;
+    std::shared_ptr<TreeNode> parent;
+    std::shared_ptr<TreeNode> child;
     unsigned long degree;
 
-    explicit TreeNode(T value) {
-      this->value = value;
-      degree = 0;
-      mark = false;
-      pointer = std::shared_ptr<Pointer>(new Pointer(this));
+    static std::shared_ptr<TreeNode> create_node(T value) {
+      auto new_node = std::shared_ptr<TreeNode>(new TreeNode(value));
+      new_node->pointer = std::shared_ptr<Pointer>(new Pointer(new_node));
+      new_node->left_sib = new_node->right_sib = new_node;
 
-      left_sib = right_sib = this;
-      parent = nullptr;
-      child = nullptr;
+      return new_node;
     }
 
-    TreeNode* hang(TreeNode* second_tree) {
+    std::shared_ptr<TreeNode> hang(std::shared_ptr<TreeNode> second_tree) {
       if (degree != second_tree->degree) {
-        throw std::runtime_error ("Trees should have the same degree to hang one to another");
+        throw std::runtime_error("Trees should have the same degree to hang one to another");
       }
 
-      TreeNode* root_tree = this;
+      std::shared_ptr<TreeNode> root_tree = get_pointer()->node;
       if (second_tree->value < root_tree->value) {
         std::swap(root_tree, second_tree);
       }
 
-      concat_node_lists(root_tree->child, second_tree);
+      concatenate_node_lists(root_tree->child, second_tree);
       second_tree->parent = root_tree;
 
       return root_tree;
@@ -314,14 +309,23 @@ class FibbonachiHeap {
     }
 
    private:
-    friend class FibbonachiHeap;
     std::shared_ptr<Pointer> pointer;
+
+    explicit TreeNode(T value) {
+      this->value = value;
+      degree = 0;
+      mark = false;
+      pointer = nullptr;
+
+      parent = nullptr;
+      child = nullptr;
+    }
   };
 
   class Pointer {
-    friend class FibbonachiHeap;
+    friend class FibonacciHeap;
    public:
-    explicit Pointer(TreeNode* node) {
+    explicit Pointer(std::shared_ptr<TreeNode> node) {
       this->node = node;
       this->valid = true;
     }
@@ -332,12 +336,12 @@ class FibbonachiHeap {
 
     T value() {
       if (!is_valid()) {
-        throw std::runtime_error ("Invalidated pointer to an element");
+        throw std::runtime_error("Invalidated pointer to an element");
       }
       return node->value;
     }
    private:
-    TreeNode* node;
+    std::shared_ptr<TreeNode> node;
     bool valid;
   };
 

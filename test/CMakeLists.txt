@@ -2,13 +2,13 @@ cmake_minimum_required(VERSION 3.9)
 
 add_executable(
         unit_tests
-        fibbonachi_heap_test.cpp
+        fibonacci_heap_test.cpp
         main.cpp)
 
 target_link_libraries(
         unit_tests
         gtest_main
-        fibbonachiHeap
+        fibonacciHeap
 )
 
 add_test(
