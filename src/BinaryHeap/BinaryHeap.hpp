@@ -13,26 +13,11 @@
 #include <cmath>
 #include "Vector.hpp"
 
-template <typename T>
+template<typename T>
 class BinaryHeap {
-  class Pointer{
-    friend class BinaryHeap<T>;
-   public:
-    Pointer(unsigned long index, BinaryHeap* parent_heap);
-
-    T value();
-
-    bool is_valid();
-
-    BinaryHeap* get_parent_heap();
-
-   private:
-    BinaryHeap* parent_heap;
-    unsigned long index;
-    bool valid;
-  };
+ private:
+  class Pointer;
  public:
-
   bool empty();
 
   size_t size();
@@ -51,21 +36,21 @@ class BinaryHeap {
 
   BinaryHeap();
 
-  template <class Iterator>
+  template<class Iterator>
   BinaryHeap(Iterator begin, Iterator end);
 
   void optimize(size_t insert_count, size_t extract_count) {
     if (size() != 0) {
-      throw std::runtime_error ("Can Not optimize non empty heap");
+      throw std::runtime_error("Can Not optimize non empty heap");
     }
     if (extract_count > insert_count) {
-      throw std::invalid_argument ("Extract count can not be grater than insert count");
+      throw std::invalid_argument("Extract count can not be grater than insert count");
     }
     if (extract_count == 0) {
-      throw std::invalid_argument ("Extract count can not be 0");
+      throw std::invalid_argument("Extract count can not be 0");
     }
 
-    double alpha = 1.0d * insert_count / extract_count;
+    double alpha = 1.0 * insert_count / extract_count;
     double prev_time_consumption = -1;
     double time_consumption = -1;
     unsigned long k = 1;
@@ -73,14 +58,31 @@ class BinaryHeap {
     while (prev_time_consumption == -1 || time_consumption <= prev_time_consumption) {
       ++k;
       prev_time_consumption = time_consumption;
-      time_consumption = (1.0d * k + alpha) / std::log(k);
+      time_consumption = (1.0 * k + alpha) / std::log(k);
     }
-
 
     tree_degree = k - 1;
   }
 
  private:
+  class Pointer {
+   public:
+    friend class BinaryHeap<T>;
+
+    Pointer(unsigned long index, BinaryHeap *parent_heap);
+
+    T value();
+
+    bool is_valid();
+
+    BinaryHeap *get_parent_heap();
+
+   private:
+    BinaryHeap *parent_heap;
+    unsigned long array_index;
+    bool valid;
+  };
+
   struct Element {
     T value;
     std::shared_ptr<typename BinaryHeap<T>::Pointer> pointer;
@@ -108,13 +110,13 @@ BinaryHeap<T>::BinaryHeap() = default;
 template<typename T>
 template<class Iterator>
 BinaryHeap<T>::BinaryHeap(Iterator begin, Iterator end) {
-  for (Iterator iter = begin; iter != end ; ++iter) {
+  for (Iterator iter = begin; iter != end; ++iter) {
     push_back_element(*iter);
   }
 
   //call sift_down for all non leaves
-  for (unsigned long i = size()/2; i > 0; --i) {
-    sift_down(i-1);
+  for (unsigned long i = size() / 2; i > 0; --i) {
+    sift_down(i - 1);
   }
 }
 
@@ -136,14 +138,14 @@ size_t BinaryHeap<T>::get_tree_degree() {
 template<typename T>
 std::shared_ptr<typename BinaryHeap<T>::Pointer> BinaryHeap<T>::insert(T value) {
   auto pointer = push_back_element(value);
-  sift_up(pointer->index);
+  sift_up(pointer->array_index);
   return pointer;
 }
 
 template<typename T>
 T BinaryHeap<T>::min() {
   if (empty()) {
-    throw std::runtime_error ("No minimal element. Heap is empty.");
+    throw std::runtime_error("No minimal element. Heap is empty.");
   }
   return storage[0].value;
 }
@@ -151,20 +153,20 @@ T BinaryHeap<T>::min() {
 template<typename T>
 T BinaryHeap<T>::extract(std::shared_ptr<BinaryHeap::Pointer> pointer) {
   if (!pointer->is_valid()) {
-    throw std::runtime_error ("Invalidated pointer to an element");
+    throw std::runtime_error("Invalidated pointer to an element");
   }
   if (pointer->get_parent_heap() != this) {
-    throw std::runtime_error ("Pointer from another heap");
+    throw std::runtime_error("Pointer from another heap");
   }
 
-  unsigned long extract_index = pointer->index;
+  unsigned long extract_index = pointer->array_index;
   T value = pointer->value();
 
   //try to swap extracted with last element and sift it down
   if (extract_index == size() - 1) {
     storage.pop_back();
   } else {
-    swap_elements(extract_index, size()-1);
+    swap_elements(extract_index, size() - 1);
     storage.pop_back();
     sift_down(extract_index);
   }
@@ -176,7 +178,7 @@ T BinaryHeap<T>::extract(std::shared_ptr<BinaryHeap::Pointer> pointer) {
 template<typename T>
 T BinaryHeap<T>::extract_min() {
   if (empty()) {
-    throw std::runtime_error ("No minimal element. Heap is empty.");
+    throw std::runtime_error("No minimal element. Heap is empty.");
   }
   return extract(storage[0].pointer);
 }
@@ -184,29 +186,29 @@ T BinaryHeap<T>::extract_min() {
 template<typename T>
 void BinaryHeap<T>::change(std::shared_ptr<BinaryHeap::Pointer> pointer, T new_value) {
   if (!pointer->is_valid()) {
-    throw std::runtime_error ("Invalidated pointer to an element");
+    throw std::runtime_error("Invalidated pointer to an element");
   }
   if (pointer->get_parent_heap() != this) {
-    throw std::runtime_error ("Pointer from another heap");
+    throw std::runtime_error("Pointer from another heap");
   }
 
   T previous_value = pointer->value();
-  storage[pointer->index].value = new_value;
+  storage[pointer->array_index].value = new_value;
 
   if (new_value > previous_value) {
-    sift_down(pointer->index);
+    sift_down(pointer->array_index);
   } else {
-    sift_up(pointer->index);
+    sift_up(pointer->array_index);
   }
 }
 
 template<typename T>
 void BinaryHeap<T>::swap_elements(unsigned long first_index, unsigned long second_index) {
-  if (first_index >= size() || second_index>= size()) {
-    throw std::out_of_range ("At least one of indexes is out of range");
+  if (first_index >= size() || second_index >= size()) {
+    throw std::out_of_range("At least one of indexes is out of range");
   }
   std::swap(storage[first_index].value, storage[second_index].value);
-  std::swap(storage[first_index].pointer->index, storage[second_index].pointer->index);
+  std::swap(storage[first_index].pointer->array_index, storage[second_index].pointer->array_index);
   std::swap(storage[first_index].pointer, storage[second_index].pointer);
 }
 
@@ -222,7 +224,7 @@ std::shared_ptr<typename BinaryHeap<T>::Pointer> BinaryHeap<T>::push_back_elemen
 template<typename T>
 void BinaryHeap<T>::sift_down(unsigned long index) {
   if (index >= size()) {
-    throw std::out_of_range ("Index is out of range");
+    throw std::out_of_range("Index is out of range");
   }
   unsigned long min_index = index;
 
@@ -242,7 +244,7 @@ void BinaryHeap<T>::sift_down(unsigned long index) {
 template<typename T>
 void BinaryHeap<T>::sift_up(unsigned long index) {
   if (index >= size()) {
-    throw std::out_of_range ("Index is out of range");
+    throw std::out_of_range("Index is out of range");
   }
   unsigned long current = index;
 
@@ -258,7 +260,7 @@ void BinaryHeap<T>::sift_up(unsigned long index) {
 template<typename T>
 unsigned long BinaryHeap<T>::nth_child(unsigned long index, unsigned long n) {
   if (index >= size()) {
-    throw std::out_of_range ("Index is out of range");
+    throw std::out_of_range("Index is out of range");
   }
   return index * tree_degree + n + 1;
 }
@@ -266,10 +268,10 @@ unsigned long BinaryHeap<T>::nth_child(unsigned long index, unsigned long n) {
 template<typename T>
 unsigned long BinaryHeap<T>::parent(unsigned long index) {
   if (index == 0) {
-    throw std::runtime_error ("Root node has no parent");
+    throw std::runtime_error("Root node has no parent");
   }
   if (index >= size()) {
-    throw std::out_of_range ("Index is out of range");
+    throw std::out_of_range("Index is out of range");
   }
   return (index - 1) / tree_degree;
 }
@@ -281,18 +283,18 @@ bool BinaryHeap<T>::Pointer::is_valid() {
 
 template<typename T>
 T BinaryHeap<T>::Pointer::value() {
-  return parent_heap->storage[index].value;
+  return parent_heap->storage[array_index].value;
 }
 
 template<typename T>
-BinaryHeap<T>::Pointer::Pointer(unsigned long index, BinaryHeap* const parent_heap) {
-  this->index = index;
+BinaryHeap<T>::Pointer::Pointer(unsigned long index, BinaryHeap *const parent_heap) {
+  this->array_index = index;
   this->parent_heap = parent_heap;
   this->valid = true;
 }
 
 template<typename T>
-BinaryHeap<T>* BinaryHeap<T>::Pointer::get_parent_heap() {
+BinaryHeap<T> *BinaryHeap<T>::Pointer::get_parent_heap() {
   return parent_heap;
 }
 
