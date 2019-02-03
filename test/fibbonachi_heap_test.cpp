@@ -2,7 +2,6 @@
 // Created by runfme on 16.11.18.
 //
 
-
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE testFibbonachiHeap
 
